@@ -370,7 +370,17 @@ class APIManager {
      * Получение информации о пользователе Steam
      */
     static async getSteamUserData(steamId) {
-        return this.fetchWithRetry(`${CONFIG.APIS.STEAM_USER}/${steamId}`);
+        const url = `${CONFIG.APIS.STEAM_USER}/${steamId}`;
+        console.log('APIManager: Запрос к Steam API:', url);
+        
+        try {
+            const response = await this.fetchWithRetry(url);
+            console.log('APIManager: Ответ Steam API:', JSON.stringify(response, null, 2));
+            return response;
+        } catch (error) {
+            console.error('APIManager: Ошибка Steam API:', error);
+            throw error;
+        }
     }
 
     /**
@@ -820,6 +830,27 @@ class SteamUserManager {
                 this.logout();
             });
         }
+
+        // ТЕСТОВАЯ ФУНКЦИЯ - удалите после отладки
+        this.addTestButton();
+    }
+
+    // ТЕСТОВАЯ ФУНКЦИЯ - удалите после отладки
+    addTestButton() {
+        const testBtn = document.createElement('button');
+        testBtn.textContent = 'Тест авторизации';
+        testBtn.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 9999; padding: 10px; background: red; color: white;';
+        testBtn.onclick = () => {
+            const testData = {
+                personaname: 'Тестовый Игрок',
+                avatarfull: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+                profileurl: 'https://steamcommunity.com/profiles/76561198000000000'
+            };
+            console.log('Тестируем отображение с данными:', testData);
+            this.displayUserInfo(testData);
+            this.showLogoutState();
+        };
+        document.body.appendChild(testBtn);
     }
 
     /**
@@ -835,13 +866,31 @@ class SteamUserManager {
      */
     async fetchAndDisplayUser(steamId) {
         try {
-            console.log('SteamUserManager: Получение данных пользователя...');
+            console.log('SteamUserManager: Получение данных пользователя для ID:', steamId);
             const userData = await APIManager.getSteamUserData(steamId);
-            console.log('SteamUserManager: Данные пользователя получены:', userData);
-            this.displayUserInfo(userData);
+            console.log('SteamUserManager: Полученные данные пользователя:', JSON.stringify(userData, null, 2));
+            
+            // Проверяем разные возможные форматы ответа
+            let processedData = userData;
+            
+            // Если данные обернуты в response или data
+            if (userData.response && userData.response.players && userData.response.players.length > 0) {
+                processedData = userData.response.players[0];
+                console.log('SteamUserManager: Используем формат Steam API response.players[0]');
+            } else if (userData.data) {
+                processedData = userData.data;
+                console.log('SteamUserManager: Используем формат data wrapper');
+            } else if (userData.player) {
+                processedData = userData.player;
+                console.log('SteamUserManager: Используем формат player wrapper');
+            }
+            
+            console.log('SteamUserManager: Обработанные данные:', JSON.stringify(processedData, null, 2));
+            this.displayUserInfo(processedData);
             this.showLogoutState();
         } catch (error) {
             Utils.logError('SteamUserManager', 'Ошибка получения данных пользователя: ' + error);
+            console.error('SteamUserManager: Детали ошибки:', error);
             this.showLoginState();
             // Удаляем некорректный steamId из localStorage
             localStorage.removeItem("steamId");
@@ -852,28 +901,94 @@ class SteamUserManager {
      * Отображение информации о пользователе
      */
     displayUserInfo(userData) {
-        if (!userData || !userData.name) {
-            console.warn("SteamUserManager: Некорректные данные пользователя");
+        console.log('SteamUserManager: Отображение данных пользователя:', JSON.stringify(userData, null, 2));
+        
+        if (!userData) {
+            console.warn("SteamUserManager: userData is null or undefined");
+            this.showLoginState();
+            return;
+        }
+
+        // Пробуем разные возможные поля для имени пользователя
+        const possibleNameFields = ['personaname', 'displayname', 'name', 'username', 'nickname'];
+        const possibleAvatarFields = ['avatarfull', 'avatarmedium', 'avatar', 'avatar_url', 'avatarUrl'];
+        const possibleProfileFields = ['profileurl', 'profile_url', 'profileUrl', 'url'];
+
+        let userName = null;
+        let userAvatar = null;
+        let userProfile = null;
+
+        // Ищем имя пользователя
+        for (const field of possibleNameFields) {
+            if (userData[field]) {
+                userName = userData[field];
+                console.log(`SteamUserManager: Найдено имя в поле "${field}":`, userName);
+                break;
+            }
+        }
+
+        // Ищем аватар
+        for (const field of possibleAvatarFields) {
+            if (userData[field]) {
+                userAvatar = userData[field];
+                console.log(`SteamUserManager: Найден аватар в поле "${field}":`, userAvatar);
+                break;
+            }
+        }
+
+        // Ищем профиль
+        for (const field of possibleProfileFields) {
+            if (userData[field]) {
+                userProfile = userData[field];
+                console.log(`SteamUserManager: Найден профиль в поле "${field}":`, userProfile);
+                break;
+            }
+        }
+
+        if (!userName) {
+            console.warn("SteamUserManager: Не удалось найти имя пользователя в данных");
+            console.warn("SteamUserManager: Доступные поля:", Object.keys(userData));
             this.showLoginState();
             return;
         }
 
         console.log('SteamUserManager: Отображение информации о пользователе');
+        console.log('SteamUserManager: Имя:', userName);
+        console.log('SteamUserManager: Аватар:', userAvatar);
+        console.log('SteamUserManager: Профиль:', userProfile);
 
         // Отображаем аватар в навигации
-        if (this.steamAvatar && userData.avatar) {
-            this.steamAvatar.src = userData.avatar;
+        if (this.steamAvatar && userAvatar) {
+            console.log('SteamUserManager: Устанавливаем аватар');
+            this.steamAvatar.src = userAvatar;
             this.steamAvatar.style.display = 'block';
             this.steamAvatar.style.width = '40px';
             this.steamAvatar.style.height = '40px';
             this.steamAvatar.style.borderRadius = '50%';
+            
+            // Добавляем обработчик ошибки загрузки изображения
+            this.steamAvatar.onerror = () => {
+                console.error('SteamUserManager: Ошибка загрузки аватара:', userAvatar);
+                this.steamAvatar.style.display = 'none';
+            };
+            
+            this.steamAvatar.onload = () => {
+                console.log('SteamUserManager: Аватар успешно загружен');
+            };
+        } else {
+            console.warn('SteamUserManager: Аватар не найден или элемент отсутствует');
+            console.warn('SteamUserManager: steamAvatar element:', this.steamAvatar);
+            console.warn('SteamUserManager: userAvatar:', userAvatar);
         }
 
         // Отображаем приветствие на главной странице
         if (this.steamWelcome) {
-            this.steamWelcome.textContent = `Добро пожаловать, ${userData.name}!`;
+            console.log('SteamUserManager: Устанавливаем приветствие');
+            this.steamWelcome.textContent = `Добро пожаловать, ${userName}!`;
             this.steamWelcome.style.color = '#00d4ff';
             this.steamWelcome.style.textShadow = '0 0 10px rgba(0, 212, 255, 0.5)';
+        } else {
+            console.warn('SteamUserManager: Элемент приветствия не найден');
         }
 
         console.log('SteamUserManager: Информация о пользователе успешно отображена');
