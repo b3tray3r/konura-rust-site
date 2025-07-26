@@ -23,7 +23,7 @@ const CONFIG = {
 
     // Update intervals (in milliseconds)
     INTERVALS: {
-        STATS_UPDATE: 120000,      // 30 seconds
+        STATS_UPDATE: 120000,      // 2 minutes
         WIPE_TIME_UPDATE: 1000,   // 1 second
         RETRY_DELAY: 5000         // 5 seconds on error
     },
@@ -96,7 +96,7 @@ class Utils {
     }
 
     /**
-     * Добебавление класса с проверкой
+     * Добавление класса с проверкой
      */
     static addClass(selector, className) {
         const element = this.$(selector);
@@ -121,7 +121,13 @@ class Utils {
     static toggleVisibility(selector, show) {
         const element = this.$(selector);
         if (element) {
-            element.classList.toggle('hidden', !show);
+            if (show) {
+                element.classList.remove('hidden');
+                element.style.display = '';
+            } else {
+                element.classList.add('hidden');
+                element.style.display = 'none';
+            }
         }
     }
 
@@ -693,7 +699,6 @@ class YouTubeManager {
             Utils.logError('YouTubeManager', 'Ошибка инициализации YouTube: ' + error);
             this.showYouTubeError();
         }
-
     }
 
     /**
@@ -754,7 +759,6 @@ class YouTubeManager {
         return card;
     }
 
-
     /**
      * Обрезка длинных заголовков
      */
@@ -778,36 +782,40 @@ class YouTubeManager {
 }
 
 // ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
-// ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
 class SteamUserManager {
     constructor() {
-        this.userInfo = Utils.$('#user-info');
-        this.loginButton = Utils.$('#steam-login'); // Предполагаемый ID кнопки входа
-        this.logoutButton = Utils.$('#steam-logout'); // ID кнопки выхода
+        this.steamLoginBtn = Utils.$('.join-steam-btn'); // Кнопка "Steam Login"
+        this.steamLogoutBtn = Utils.$('#steam-logout'); // Кнопка "Выйти"
+        this.steamAvatar = Utils.$('#steam-avatar'); // Аватар в навигации
+        this.steamWelcome = Utils.$('#steam-welcome'); // Приветствие на главной
         this.init();
     }
 
     async init() {
+        console.log('SteamUserManager: Инициализация...');
+        
         const steamId = this.getSteamIdFromURL();
         if (steamId) {
+            console.log('SteamUserManager: SteamID найден в URL:', steamId);
             // Если SteamID есть в URL, значит это возврат после авторизации
-            localStorage.setItem("steamId", steamId); // Сохраняем ID
-            history.replaceState({}, document.title, "/"); // Опционально: убираем steamid из URL
+            localStorage.setItem("steamId", steamId);
+            history.replaceState({}, document.title, "/"); // Убираем steamid из URL
             await this.fetchAndDisplayUser(steamId);
         } else {
             // Проверяем, есть ли сохраненный ID (пользователь уже залогинен)
             const savedSteamId = localStorage.getItem("steamId");
             if (savedSteamId) {
+                console.log('SteamUserManager: Найден сохраненный SteamID:', savedSteamId);
                 await this.fetchAndDisplayUser(savedSteamId);
             } else {
-                // Пользователь не залогинен
-                this.hideUserInfo();
+                console.log('SteamUserManager: Пользователь не авторизован');
+                this.showLoginState();
             }
         }
 
         // Добавляем обработчик события для кнопки выхода
-        if (this.logoutButton) {
-            this.logoutButton.addEventListener('click', (e) => {
+        if (this.steamLogoutBtn) {
+            this.steamLogoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.logout();
             });
@@ -827,13 +835,16 @@ class SteamUserManager {
      */
     async fetchAndDisplayUser(steamId) {
         try {
+            console.log('SteamUserManager: Получение данных пользователя...');
             const userData = await APIManager.getSteamUserData(steamId);
+            console.log('SteamUserManager: Данные пользователя получены:', userData);
             this.displayUserInfo(userData);
-            this.showLogoutState(); // Показываем состояние "залогинен"
+            this.showLogoutState();
         } catch (error) {
             Utils.logError('SteamUserManager', 'Ошибка получения данных пользователя: ' + error);
-            this.hideUserInfo();
-            this.showLoginState(); // В случае ошибки показываем состояние "не залогинен"
+            this.showLoginState();
+            // Удаляем некорректный steamId из localStorage
+            localStorage.removeItem("steamId");
         }
     }
 
@@ -842,65 +853,80 @@ class SteamUserManager {
      */
     displayUserInfo(userData) {
         if (!userData || !userData.name) {
-             console.warn("SteamUserManager: Invalid user data received");
-             this.hideUserInfo();
-             return;
+            console.warn("SteamUserManager: Некорректные данные пользователя");
+            this.showLoginState();
+            return;
         }
-        Utils.updateText('#username', userData.name);
-        Utils.updateAttribute('#user-avatar', 'src', userData.avatar);
-        Utils.updateAttribute('#user-profile', 'href', userData.profile);
-        // Показываем блок с информацией о пользователе
-        Utils.toggleVisibility('#user-info', true);
-        console.log("SteamUserManager: User info displayed successfully");
+
+        console.log('SteamUserManager: Отображение информации о пользователе');
+
+        // Отображаем аватар в навигации
+        if (this.steamAvatar && userData.avatar) {
+            this.steamAvatar.src = userData.avatar;
+            this.steamAvatar.style.display = 'block';
+            this.steamAvatar.style.width = '40px';
+            this.steamAvatar.style.height = '40px';
+            this.steamAvatar.style.borderRadius = '50%';
+        }
+
+        // Отображаем приветствие на главной странице
+        if (this.steamWelcome) {
+            this.steamWelcome.textContent = `Добро пожаловать, ${userData.name}!`;
+            this.steamWelcome.style.color = '#00d4ff';
+            this.steamWelcome.style.textShadow = '0 0 10px rgba(0, 212, 255, 0.5)';
+        }
+
+        console.log('SteamUserManager: Информация о пользователе успешно отображена');
     }
 
     /**
-     * Скрываем информацию о пользователе и показываем кнопку входа
-     */
-    hideUserInfo() {
-        Utils.toggleVisibility('#user-info', false);
-        this.showLoginState();
-    }
-
-    /**
-     * Показываем состояние "залогинен": скрываем кнопку входа, показываем кнопку выхода
-     */
-    showLogoutState() {
-        if (this.loginButton) {
-            // this.loginButton.style.display = 'none'; // Используя стиль
-            Utils.toggleVisibility('#steam-login', false); // Используя утилиту (предполагает наличие класса .hidden)
-        }
-        if (this.logoutButton) {
-            // this.logoutButton.style.display = 'block'; // Используя стиль
-             Utils.toggleVisibility('#steam-logout', true); // Используя утилиту
-        }
-    }
-
-    /**
-     * Показываем состояние "не залогинен": показываем кнопку входа, скрываем кнопку выхода
+     * Показываем состояние "не залогинен"
      */
     showLoginState() {
-        if (this.loginButton) {
-             Utils.toggleVisibility('#steam-login', true);
-            // this.loginButton.style.display = 'block';
+        console.log('SteamUserManager: Переключение в состояние "не залогинен"');
+        
+        // Показываем кнопку входа
+        Utils.toggleVisibility('.join-steam-btn', true);
+        
+        // Скрываем кнопку выхода
+        Utils.toggleVisibility('#steam-logout', false);
+        
+        // Скрываем аватар
+        if (this.steamAvatar) {
+            this.steamAvatar.style.display = 'none';
+            this.steamAvatar.src = '';
         }
-        if (this.logoutButton) {
-             Utils.toggleVisibility('#steam-logout', false);
-            // this.logoutButton.style.display = 'none';
+        
+        // Очищаем приветствие
+        if (this.steamWelcome) {
+            this.steamWelcome.textContent = '';
         }
+    }
+
+    /**
+     * Показываем состояние "залогинен"
+     */
+    showLogoutState() {
+        console.log('SteamUserManager: Переключение в состояние "залогинен"');
+        
+        // Скрываем кнопку входа
+        Utils.toggleVisibility('.join-steam-btn', false);
+        
+        // Показываем кнопку выхода
+        Utils.toggleVisibility('#steam-logout', true);
     }
 
     /**
      * Выход из аккаунта
      */
     logout() {
+        console.log('SteamUserManager: Выход из аккаунта');
+        
         localStorage.removeItem("steamId"); // Удаляем ID из хранилища
-        this.hideUserInfo(); // Скрываем информацию о пользователе
-        this.showLoginState(); // Показываем кнопку входа
-         // Если вы используете глобальную переменную для steamId, как в закомментированном коде,
-         // её также нужно удалить или установить в null
-         // window.steamId = null; // Пример, если такая переменная существует
-         console.log("Пользователь вышел из аккаунта");
+        this.showLoginState(); // Переключаемся в состояние "не залогинен"
+        
+        // Показываем уведомление
+        alert('Вы успешно вышли из аккаунта');
     }
 }
 
@@ -1117,6 +1143,29 @@ style.textContent = `
   .youtube-error button:hover {
     background: var(--primary-hover);
   }
+  
+  /* Стили для аватара Steam */
+  #steam-avatar {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  #steam-avatar:hover {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+    transform: scale(1.05);
+  }
+  
+  /* Стили для приветствия */
+  #steam-welcome {
+    text-align: center;
+    margin: 1rem 0;
+    font-weight: bold;
+    background: linear-gradient(45deg, #00d4ff, #0099cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 `;
 document.head.appendChild(style);
 
@@ -1141,5 +1190,3 @@ class NeonTransitionManager {
         }
     }
 }
-
-

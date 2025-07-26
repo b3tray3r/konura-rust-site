@@ -28,7 +28,8 @@
             <div class="logo">
                 <span class="logo-text">KONURA</span>
             </div>
-            <img class="steam-avatar-img" id="steam-avatar" />
+            <!-- Аватар пользователя Steam -->
+            <img class="steam-avatar-img" id="steam-avatar" style="display: none;" />
             <div class="nav-links" id="nav-links">
                 <a href="#home" class="nav-link">Главная</a>
                 <a href="#about" class="nav-link">О сервере</a>
@@ -41,6 +42,7 @@
                     <span class="btn-icon">🎮</span>
                     Подключиться
                 </a>
+                <!-- Кнопка входа через Steam -->
                 <a href="https://ktor-server-u2py.onrender.com/steam/login" class="join-server-btn join-steam-btn"
                     title="Войти через Steam">
                     <span class="btn-icon"><img class="steam-icon"
@@ -49,8 +51,9 @@
                     Steam Login
                 </a>
                 <!-- Кнопка выхода (изначально скрыта) -->
-                <button id="steam-logout" class="join-server-btn hidden" style="display: none;">
-                    <i class="fab fa-steam-symbol"></i> Выйти
+                <button id="steam-logout" class="join-server-btn" style="display: none;">
+                    <span class="btn-icon">🚪</span>
+                    Выйти
                 </button>
             </div>
 
@@ -62,24 +65,13 @@
         </div>
     </nav>
 
-    <!-- Информация о пользователе -->
-    <div id="user-info" class="user-info hidden">
-        <div class="user-avatar">
-            <img id="user-avatar" src="" alt="Аватар пользователя" width="64" height="64">
-        </div>
-        <div class="user-details">
-            <a id="user-profile" href="#" target="_blank" rel="noopener">
-                <strong id="username">Загрузка...</strong>
-            </a>
-        </div>
-    </div>
-
     <!-- Главная секция -->
     <section id="home" class="hero">
         <div class="hero-content">
             <h1 class="hero-title">
                 KONURA <span class="rust-text">RUST</span>
             </h1>
+            <!-- Приветствие пользователя Steam -->
             <p id="steam-welcome" style="font-size: 24px; font-weight: bold;"></p>
 
             <p class="hero-subtitle">
