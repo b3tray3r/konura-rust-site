@@ -1,272 +1,318 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="KONURA RUST - Лучший сервер выживания в Rust. Присоединяйтесь к активному сообществу игроков.">
     <title>KONURA RUST - Лучший сервер выживания</title>
-
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 
 <body>
     <!-- Видео фон -->
     <div class="video-background">
-        <div class="video-placeholder">
-            <video autoplay muted loop playsinline>
-                <source src="assets/dome.mp4" type="video/mp4">
-                Ваш браузер не поддерживает видео.
-            </video>
-        </div>
+        <video autoplay muted loop playsinline preload="metadata">
+            <source src="assets/dome.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+        <div class="video-overlay"></div>
     </div>
 
     <!-- Навигация -->
-    <nav class="navbar">
-        <div class="logo">KONURA</div>
-        <div class="nav-links">
-            <a href="#home">Главная</a>
-            <a href="#about">О сервере</a>
-            <a href="#shop">Магазин</a>
-            <a href="#connect">Контакты</a>
-        </div>
-        <a href="steam://connect/203.16.163.232:28834" class="join-server-btn">Подключиться</a>
-        <div class="steam-login-btn">
-            <a href="https://ktor-server-u2py.onrender.com/steam/login">
-                <img src="https://community.akamai.steamstatic.com/public/shared/images/header/logo_steam.svg?t=962016"
-                    alt="Войти через Steam">
-            </a>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-text">KONURA</span>
+            </div>
+            
+            <div class="nav-links" id="nav-links">
+                <a href="#home" class="nav-link">Главная</a>
+                <a href="#about" class="nav-link">О сервере</a>
+                <a href="#shop" class="nav-link">Магазин</a>
+                <a href="#connect" class="nav-link">Контакты</a>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="steam://connect/203.16.163.232:28834" class="join-server-btn" id="join-server">
+                    <span class="btn-icon">🎮</span>
+                    Подключиться
+                </a>
+                <a href="https://ktor-server-u2py.onrender.com/steam/login" class="steam-login-btn" title="Войти через Steam">
+                    <img src="https://community.akamai.steamstatic.com/public/shared/images/header/logo_steam.svg?t=962016" alt="Steam Login">
+                </a>
+            </div>
+            
+            <button class="mobile-menu-toggle" id="mobile-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
-    <div id="user-info" style="display: flex; align-items: center; gap: 1rem;">
-        <img id="avatar" src="" width="64" height="64" style="border-radius: 50%;" />
-        <div>
-            <a id="profile" href="#" target="_blank">
+
+    <!-- Информация о пользователе -->
+    <div id="user-info" class="user-info hidden">
+        <div class="user-avatar">
+            <img id="user-avatar" src="" alt="Аватар пользователя" width="64" height="64">
+        </div>
+        <div class="user-details">
+            <a id="user-profile" href="#" target="_blank" rel="noopener">
                 <strong id="username">Загрузка...</strong>
             </a>
         </div>
     </div>
+
     <!-- Главная секция -->
     <section id="home" class="hero">
-        <h1>KONURA <span class="rust-text">RUST</span></h1>
-        <p>Присоединяйтесь к самому интенсивному опыту выживания в пустошах. Стройте, сражайтесь и выживайте на нашем
-            уникальном Rust сервере.</p>
-        <a href="#join" class="cta-button">
-            🚀 Подключиться к серверу
-        </a>
-        <!-- Статус сервера -->
+        <div class="hero-content">
+            <h1 class="hero-title">
+                KONURA <span class="rust-text">RUST</span>
+            </h1>
+            <p class="hero-subtitle">
+                Присоединяйтесь к самому интенсивному опыту выживания в пустошах.
+            </p>
+            <div class="hero-actions">
+                <a href="#join" class="cta-button primary" id="hero-join">
+                    <span class="btn-icon">🚀</span>
+                    Подключиться к серверу
+                </a>
+            </div>
+        </div>
+
+        <!-- Статистика -->
         <div class="stats-container">
-            <!-- Rust -->
-            <div class="stat-card">
-                <h3>Статус сервера <span class="status-online">--</span></h3>
-                <div class="server-info">
-                    <strong>Konura Rust Официальный</strong><br />
-                    <span>EU West - Низкая задержка</span>
+            <!-- Статистика Rust сервера -->
+            <div class="stat-card server-stats">
+                <div class="stat-header">
+                    <h3>Статус сервера</h3>
+                    <span class="status-badge" id="server-status">--</span>
                 </div>
+                
+                <div class="server-info">
+                    <strong class="server-name">Konura Rust Официальный</strong>
+                    <span class="server-location">EU West - Низкая задержка</span>
+                </div>
+                
                 <div class="stat-row">
-                    <span>👥 Игроков онлайн</span>
+                    <span class="stat-label">👥 Игроков онлайн</span>
                     <span class="stat-value" id="rust-players">--</span>
                 </div>
-                <div class="capacity-bar">
-                    <div class="capacity-fill" id="rust-fill"></div>
+                
+                <div class="capacity-container">
+                    <div class="capacity-bar">
+                        <div class="capacity-fill" id="rust-fill"></div>
+                    </div>
+                    <span class="capacity-percent" id="rust-percent">--% заполненность</span>
                 </div>
-                <span id="rust-percent">--% заполненность</span>
             </div>
 
-            <!-- Discord сервер -->
-            <div class="stat-card">
-                <h3>Discord сервер <span class="status-live">Live</span></h3>
+            <!-- Discord статистика -->
+            <div class="stat-card discord-stats">
+                <div class="stat-header">
+                    <h3>Discord сервер</h3>
+                    <span class="status-badge live">Live</span>
+                </div>
+                
                 <div class="server-info">
-                    <strong>Konura Community</strong><br />
-                    <span>Официальный хаб сообщества</span>
+                    <strong class="server-name">Konura Community</strong>
+                    <span class="server-location">Официальный хаб сообщества</span>
                 </div>
-                <div class="discord-stats">
-                    <div>
-                        <div class="discord-total">Всего участников</div>
-                        <strong class="discord-total-num" id="discord-total">--</strong>
+                
+                <div class="discord-metrics">
+                    <div class="metric">
+                        <div class="metric-label">Всего участников</div>
+                        <strong class="metric-value" id="discord-total">--</strong>
                     </div>
-                    <div>
-                        <div class="discord-online">Сейчас онлайн</div>
-                        <strong class="discord-online-num" id="discord-online">--</strong>
+                    <div class="metric">
+                        <div class="metric-label">Сейчас онлайн</div>
+                        <strong class="metric-value" id="discord-online">--</strong>
                     </div>
                 </div>
-                <button class="discord-btn" onclick="window.open('https://discord.gg/PhDmKZ67')">Присоединиться к
-                    Discord</button>
+                
+                <button class="discord-btn" id="discord-join">
+                    <span class="btn-icon">💬</span>
+                    Присоединиться
+                </button>
             </div>
 
             <!-- Информация о сервере -->
-            <div class="stat-card">
-                <h3>
-                    Информация о сервере
-                </h3>
-                <div class="stat-row" id="wipe-date">
-                    <span>Дата последнего <br>вайпа: </span>
-                    <span class="stat-value" id="wipe-date-value">--</span>
+            <div class="stat-card server-info-card">
+                <div class="stat-header">
+                    <h3>Информация о сервере</h3>
                 </div>
-                <div class="stat-row" id="wipe-time">
-                    <span>Время с последнего <br>вайпа: </span>
-                    <span class="stat-value" id="wipe-time-value">--</span>
+                
+                <div class="info-rows">
+                    <div class="stat-row">
+                        <span class="stat-label">Дата последнего вайпа:</span>
+                        <span class="stat-value" id="wipe-date-value">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Время с вайпа:</span>
+                        <span class="stat-value" id="wipe-time-value">--</span>
+                    </div>
                 </div>
-            </div>
-
-    </section>
-
-    <section id="map" class="map-section">
-        <div class="map-card">
-            <h3>🗺️ Карта сервера</h3>
-            <img id="map-thumbnail" src="" alt="Превью карты" class="map-image" />
-            <div class="map-info">
-                <p><strong>Название:</strong> <span id="map-name">—</span></p>
-                <p><strong>Размер:</strong> <span id="map-size">—</span></p>
-                <p><strong>Монументов:</strong> <span id="map-monuments">—</span></p>
-                <a href="" id="map-link" target="_blank" class="map-button">🌍 Открыть карту на RustMaps</a>
             </div>
         </div>
     </section>
 
-    <!-- Контент секция -->
-    <section class="content-section">
-        <div class="section-grid">
-            <!-- Последний контент -->
-            <div>
-                <h2>Последний контент</h2>
-
-                <div class="content-item">
-                    <div class="content-thumbnail">
-                        <div class="play-button">▶</div>
-                    </div>
-                    <div class="content-info">
-                        <h4>Эпичные рейдовые моменты</h4>
-                        <div class="content-meta">
-                            👁️ 12K • 📅 2 дня назад<br>
-                            💬 542 комментария
+    <!-- Карта сервера -->
+    <section id="map" class="map-section">
+        <div class="container">
+            <div class="map-card">
+                <div class="map-header">
+                    <h3>🗺️ Карта сервера</h3>
+                </div>
+                
+                <div class="map-content">
+                    <div class="map-image-container">
+                        <img id="map-thumbnail" alt="Карта сервера" class="map-image" loading="lazy">
+                        <div class="map-overlay">
+                            <a id="map-link" target="_blank" rel="noopener" class="map-view-btn">
+                                🌍 Открыть карту
+                            </a>
                         </div>
                     </div>
-                </div>
-
-                <div class="content-item">
-                    <div class="content-thumbnail">
-                        <iframe width="100%" height="100%"
-                            src="https://www.youtube.com/watch?v=dQw4w9WgXcQ?controls=0&autoplay=0&mute=1"
-                            title="YouTube video player" frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen>
-                        </iframe>
-                    </div>
-                    <div class="content-info">
-                        <h4>Название видео</h4>
-                        <div class="content-meta">
-                            👁️ 12K • 📅 2 дня назад<br>
-                            💬 542 комментария
+                    
+                    <div class="map-info">
+                        <div class="map-detail">
+                            <strong>Название:</strong>
+                            <span id="map-name">—</span>
                         </div>
-                    </div>
-                </div>
-
-
-                <div class="content-item">
-                    <div class="content-thumbnail">
-                        <div class="play-button">▶</div>
-                    </div>
-                    <div class="content-info">
-                        <h4>PvP советы и тактики</h4>
-                        <div class="content-meta">
-                            👁️ 15K • 📅 3 дня назад<br>
-                            💬 328 комментариев
+                        <div class="map-detail">
+                            <strong>Размер:</strong>
+                            <span id="map-size">—</span>
+                        </div>
+                        <div class="map-detail">
+                            <strong>Монументов:</strong>
+                            <span id="map-monuments">—</span>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <!-- Почему выбрать Konura -->
-            <div class="features">
-                <h2>Почему выбрать Konura?</h2>
-
-                <div class="feature-item">
-                    <h3>Уникальный геймплей</h3>
-                    <p>Испытайте Rust как никогда раньше с нашими кастомными плагинами, сбалансированной PvP механикой и
-                        уникальными событиями, которые поддерживают азарт 24/7.</p>
+    <!-- Контент и преимущества -->
+    <section id="about" class="content-section">
+        <div class="container">
+            <div class="section-grid">
+                <!-- YouTube контент -->
+                <div class="youtube-content">
+                    <h2 class="section-title">Последние видео</h2>
+                    <div class="youtube-cards" id="youtube-cards">
+                        <!-- Динамически загружаемые видео -->
+                    </div>
                 </div>
-
-                <div class="feature-item">
-                    <h3>Активное сообщество</h3>
-                    <p>Присоединяйтесь к более чем 1,000 активных игроков в нашем Discord сообществе. Получайте помощь,
-                        формируйте команды и участвуйте в эксклюзивных мероприятиях сообщества.</p>
-                </div>
-
-                <div class="feature-item">
-                    <h3>Честная игра</h3>
-                    <p>Наша преданная команда администраторов обеспечивает честную игру с активной модерацией, системами
-                        анти-чита и прозрачными правилами, которые соблюдают все.</p>
-                </div>
-
-                <div class="feature-item">
-                    <h3>Регулярные обновления</h3>
-                    <p>Мы поддерживаем актуальность с последними обновлениями Rust и постоянно улучшаем наш сервер на
-                        основе отзывов сообщества.</p>
+                
+                <!-- Преимущества -->
+                <div class="features">
+                    <h2 class="section-title">Почему выбрать Konura?</h2>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <div class="feature-icon">⚔️</div>
+                            <h3>Уникальный геймплей</h3>
+                            <p>Кастомные плагины, события и PvP механики.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">👥</div>
+                            <h3>Активное сообщество</h3>
+                            <p>Более 1000 игроков в Discord, постоянная активность.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">🛡️</div>
+                            <h3>Честная игра</h3>
+                            <p>Античит, модерация, прозрачные правила.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">🔄</div>
+                            <h3>Обновления</h3>
+                            <p>Сервер актуален, учитываем ваши отзывы.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Призыв к действию -->
-    <section class="cta-section">
-        <h2>Готовы выживать?</h2>
-        <p>Присоединяйтесь к тысячам игроков в лучшем опыте Rust. Получите VIP доступ для эксклюзивных преимуществ и
-            приоритетной очереди.</p>
-        <div class="cta-buttons">
-            <a href="#join" class="cta-button">🚀 Подключиться к серверу</a>
-            <a href="file:///C:/Users/Michael/Desktop/rust-site/shop/shop.html" class="cta-button-shop">🛒 Посетить
-                магазин</a>
+    <section id="shop" class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Готовы выживать?</h2>
+                <p class="cta-subtitle">Присоединяйтесь к тысячам игроков. Получите VIP доступ.</p>
+                
+                <div class="cta-buttons">
+                    <a href="#join" class="cta-button primary" id="cta-join">
+                        <span class="btn-icon">🚀</span>
+                        Подключиться
+                    </a>
+                    <a href="/shop/shop.html" class="cta-button secondary">
+                        <span class="btn-icon">🛒</span>
+                        Магазин
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- Футер -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>KONURA RUST</h3>
-                <p>Лучший опыт выживания в Rust. Присоединяйтесь к тысячам игроков в интенсивных PvP боях, строительстве
-                    баз и событиях сообщества.</p>
-                <div class="social-icons">
-                    <a href="https://www.youtube.com/@KonuraRust" title="YouTube">
-                        <img src="assets/YouTube-logo.svg">
-                    </a>
-                    <a href="https://t.me/konurarust" title="Telegram">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Telegram_2019_Logo.svg">
-                    </a>
+    <footer id="connect" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">KONURA RUST</h3>
+                    <p class="footer-description">
+                        Интенсивные PvP бои, строительство и выживание.
+                    </p>
+                    <div class="social-icons">
+                        <a href="https://www.youtube.com/@KonuraRust" class="social-link youtube" title="YouTube">
+                            <img src="assets/YouTube-logo.svg" alt="YouTube">
+                        </a>
+                        <a href="https://t.me/konurarust" class="social-link telegram" title="Telegram">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Telegram_2019_Logo.svg" alt="Telegram">
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3 class="footer-title">Быстрые ссылки</h3>
+                    <ul class="footer-links">
+                        <li><a href="#join">Подключиться</a></li>
+                        <li><a href="#rules">Правила</a></li>
+                        <li><a href="#shop">Магазин</a></li>
+                        <li><a href="#discord">Discord</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3 class="footer-title">Поддержка</h3>
+                    <ul class="footer-links">
+                        <li><a href="#help">Помощь</a></li>
+                        <li><a href="#bugs">Сообщить об ошибке</a></li>
+                        <li><a href="#admin">Администратор</a></li>
+                        <li><a href="#appeals">Апелляция</a></li>
+                    </ul>
                 </div>
             </div>
-
-            <div class="footer-section">
-                <h3>Быстрые ссылки</h3>
-                <ul class="footer-links">
-                    <li><a href="#join">Подключиться к серверу</a></li>
-                    <li><a href="#rules">Правила сервера</a></li>
-                    <li><a href="#shop">VIP магазин</a></li>
-                    <li><a href="#discord">Discord</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-section">
-                <h3>Поддержка</h3>
-                <ul class="footer-links">
-                    <li><a href="#help">Центр помощи</a></li>
-                    <li><a href="#bugs">Сообщить об ошибке</a></li>
-                    <li><a href="#admin">Связаться с администратором</a></li>
-                    <li><a href="#appeals">Подать апелляцию</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2024 Konura Rust. Все права защищены.</p>
-            <div class="footer-bottom-links">
-                <a href="#privacy">Политика конфиденциальности</a>
-                <a href="#terms">Условия использования</a>
+            
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p class="copyright">&copy; 2024 Konura Rust. Все права защищены.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#privacy">Конфиденциальность</a>
+                        <a href="#terms">Условия</a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- Скрипты -->
     <script src="script.js"></script>
 </body>
-
 </html>
