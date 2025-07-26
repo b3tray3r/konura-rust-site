@@ -1066,3 +1066,31 @@ class NeonTransitionManager {
 document.addEventListener('DOMContentLoaded', () => {
     const neonTransition = new NeonTransitionManager();
 });
+
+const urlParams = new URLSearchParams(window.location.search);
+  const steamId = urlParams.get('steamId');
+
+  // Если есть, сохраняем в localStorage
+  if (steamId) {
+    localStorage.setItem('steamId', steamId);
+    // Чистим URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+async function fetchSteamUserInfo() {
+    const steamId = localStorage.getItem('steamId');
+    if (!steamId) return;
+
+    try {
+      const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
+      if (!res.ok) throw new Error("Не удалось загрузить профиль");
+      const user = await res.json();
+
+      const welcomeElement = document.getElementById("steam-welcome");
+      welcomeElement.textContent = `Привет, ${user.name}`;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  fetchSteamUserInfo();
