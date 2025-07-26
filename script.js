@@ -792,6 +792,7 @@ class YouTubeManager {
 }
 
 // ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
+// ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
 class SteamUserManager {
     constructor() {
         this.steamLoginBtn = Utils.$('.join-steam-btn'); // Кнопка "Steam Login"
@@ -809,7 +810,9 @@ class SteamUserManager {
             console.log('SteamUserManager: SteamID найден в URL:', steamId);
             // Если SteamID есть в URL, значит это возврат после авторизации
             localStorage.setItem("steamId", steamId);
-            history.replaceState({}, document.title, "/"); // Убираем steamid из URL
+            // ИСПРАВЛЕНИЕ: Используем правильный путь для GitHub Pages
+            const correctPath = this.getCorrectPath();
+            history.replaceState({}, document.title, correctPath); // Убираем steamid из URL
             await this.fetchAndDisplayUser(steamId);
         } else {
             // Проверяем, есть ли сохраненный ID (пользователь уже залогинен)
@@ -835,6 +838,28 @@ class SteamUserManager {
         this.addTestButton();
     }
 
+    /**
+     * НОВЫЙ МЕТОД: Получение правильного пути для GitHub Pages
+     */
+    getCorrectPath() {
+        const currentPath = window.location.pathname;
+        
+        // Если мы на GitHub Pages (содержит /konura-rust-site/)
+        if (currentPath.includes('/konura-rust-site/')) {
+            return '/konura-rust-site/';
+        }
+        
+        // Если мы на локальном хосте или кастомном домене
+        if (window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1' ||
+            !window.location.hostname.includes('github.io')) {
+            return '/';
+        }
+        
+        // По умолчанию для GitHub Pages
+        return '/konura-rust-site/';
+    }
+
     // ТЕСТОВАЯ ФУНКЦИЯ - удалите после отладки
     addTestButton() {
         const testBtn = document.createElement('button');
@@ -854,11 +879,20 @@ class SteamUserManager {
     }
 
     /**
-     * Получение Steam ID из URL
+     * УЛУЧШЕННЫЙ МЕТОД: Получение Steam ID из URL с лучшей обработкой путей
      */
     getSteamIdFromURL() {
+        // Получаем параметры из URL
         const params = new URLSearchParams(window.location.search);
-        return params.get('steamId');
+        const steamId = params.get('steamId');
+        
+        if (steamId) {
+            console.log('SteamUserManager: Найден steamId в параметрах URL:', steamId);
+            console.log('SteamUserManager: Текущий URL:', window.location.href);
+            console.log('SteamUserManager: Текущий путь:', window.location.pathname);
+        }
+        
+        return steamId;
     }
 
     /**
@@ -1044,6 +1078,7 @@ class SteamUserManager {
         alert('Вы успешно вышли из аккаунта');
     }
 }
+
 
 // ===== ГЛАВНЫЙ КЛАСС ПРИЛОЖЕНИЯ =====
 class App {
