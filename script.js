@@ -1088,6 +1088,7 @@ async function fetchSteamUserInfo() {
 
       const welcomeElement = document.getElementById("steam-welcome");
       welcomeElement.textContent = `Привет, ${user.name}`;
+      document.getElementById("steam-avatar").src = user.avatar;
     } catch (e) {
       console.error(e);
     }
