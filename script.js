@@ -793,6 +793,7 @@ class YouTubeManager {
 
 // ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
 // ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
+// ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM (исправленная версия) =====
 class SteamUserManager {
     constructor() {
         this.steamLoginBtn = Utils.$('.join-steam-btn'); // Кнопка "Steam Login"
@@ -804,18 +805,24 @@ class SteamUserManager {
 
     async init() {
         console.log('SteamUserManager: Инициализация...');
+        console.log('SteamUserManager: Элемент приветствия найден:', !!this.steamWelcome);
+        
+        // Если элемент не найден сразу, пробуем найти его через короткую задержку
+        if (!this.steamWelcome) {
+            setTimeout(() => {
+                this.steamWelcome = Utils.$('#steam-welcome');
+                console.log('SteamUserManager: Повторный поиск элемента приветствия:', !!this.steamWelcome);
+            }, 100);
+        }
         
         const steamId = this.getSteamIdFromURL();
         if (steamId) {
             console.log('SteamUserManager: SteamID найден в URL:', steamId);
-            // Если SteamID есть в URL, значит это возврат после авторизации
             localStorage.setItem("steamId", steamId);
-            // ИСПРАВЛЕНИЕ: Используем правильный путь для GitHub Pages
             const correctPath = this.getCorrectPath();
-            history.replaceState({}, document.title, correctPath); // Убираем steamid из URL
+            history.replaceState({}, document.title, correctPath);
             await this.fetchAndDisplayUser(steamId);
         } else {
-            // Проверяем, есть ли сохраненный ID (пользователь уже залогинен)
             const savedSteamId = localStorage.getItem("steamId");
             if (savedSteamId) {
                 console.log('SteamUserManager: Найден сохраненный SteamID:', savedSteamId);
@@ -835,32 +842,29 @@ class SteamUserManager {
         }
 
         // ТЕСТОВАЯ ФУНКЦИЯ - удалите после отладки
-        this.addTestButton();
+        // this.addTestButton();
     }
 
     /**
-     * НОВЫЙ МЕТОД: Получение правильного пути для GitHub Pages
+     * Получение правильного пути для GitHub Pages
      */
     getCorrectPath() {
         const currentPath = window.location.pathname;
         
-        // Если мы на GitHub Pages (содержит /konura-rust-site/)
         if (currentPath.includes('/konura-rust-site/')) {
             return '/konura-rust-site/';
         }
         
-        // Если мы на локальном хосте или кастомном домене
         if (window.location.hostname === 'localhost' || 
             window.location.hostname === '127.0.0.1' ||
             !window.location.hostname.includes('github.io')) {
             return '/';
         }
         
-        // По умолчанию для GitHub Pages
         return '/konura-rust-site/';
     }
 
-    // ТЕСТОВАЯ ФУНКЦИЯ - удалите после отладки
+    // ТЕСТОВАЯ ФУНКЦИЯ с проверкой приветствия
     addTestButton() {
         const testBtn = document.createElement('button');
         testBtn.textContent = 'Тест авторизации';
@@ -879,10 +883,9 @@ class SteamUserManager {
     }
 
     /**
-     * УЛУЧШЕННЫЙ МЕТОД: Получение Steam ID из URL с лучшей обработкой путей
+     * Получение Steam ID из URL
      */
     getSteamIdFromURL() {
-        // Получаем параметры из URL
         const params = new URLSearchParams(window.location.search);
         const steamId = params.get('steamId');
         
@@ -904,10 +907,8 @@ class SteamUserManager {
             const userData = await APIManager.getSteamUserData(steamId);
             console.log('SteamUserManager: Полученные данные пользователя:', JSON.stringify(userData, null, 2));
             
-            // Проверяем разные возможные форматы ответа
             let processedData = userData;
             
-            // Если данные обернуты в response или data
             if (userData.response && userData.response.players && userData.response.players.length > 0) {
                 processedData = userData.response.players[0];
                 console.log('SteamUserManager: Используем формат Steam API response.players[0]');
@@ -926,13 +927,12 @@ class SteamUserManager {
             Utils.logError('SteamUserManager', 'Ошибка получения данных пользователя: ' + error);
             console.error('SteamUserManager: Детали ошибки:', error);
             this.showLoginState();
-            // Удаляем некорректный steamId из localStorage
             localStorage.removeItem("steamId");
         }
     }
 
     /**
-     * Отображение информации о пользователе
+     * УЛУЧШЕННЫЙ МЕТОД: Отображение информации о пользователе
      */
     displayUserInfo(userData) {
         console.log('SteamUserManager: Отображение данных пользователя:', JSON.stringify(userData, null, 2));
@@ -1000,7 +1000,6 @@ class SteamUserManager {
             this.steamAvatar.style.height = '40px';
             this.steamAvatar.style.borderRadius = '50%';
             
-            // Добавляем обработчик ошибки загрузки изображения
             this.steamAvatar.onerror = () => {
                 console.error('SteamUserManager: Ошибка загрузки аватара:', userAvatar);
                 this.steamAvatar.style.display = 'none';
@@ -1011,21 +1010,105 @@ class SteamUserManager {
             };
         } else {
             console.warn('SteamUserManager: Аватар не найден или элемент отсутствует');
-            console.warn('SteamUserManager: steamAvatar element:', this.steamAvatar);
-            console.warn('SteamUserManager: userAvatar:', userAvatar);
         }
 
-        // Отображаем приветствие на главной странице
-        if (this.steamWelcome) {
-            console.log('SteamUserManager: Устанавливаем приветствие');
-            this.steamWelcome.textContent = `Добро пожаловать, ${userName}!`;
-            this.steamWelcome.style.color = '#00d4ff';
-            this.steamWelcome.style.textShadow = '0 0 10px rgba(0, 212, 255, 0.5)';
-        } else {
-            console.warn('SteamUserManager: Элемент приветствия не найден');
-        }
+        // ИСПРАВЛЕННОЕ отображение приветствия на главной странице
+        this.displayWelcomeMessage(userName);
 
         console.log('SteamUserManager: Информация о пользователе успешно отображена');
+    }
+
+    /**
+     * НОВЫЙ МЕТОД: Отображение приветствия с дополнительными проверками
+     */
+    displayWelcomeMessage(userName) {
+        console.log('SteamUserManager: ПОПЫТКА отображения приветствия для:', userName);
+        
+        // Пробуем найти элемент несколькими способами
+        let welcomeElement = this.steamWelcome || Utils.$('#steam-welcome') || document.getElementById('steam-welcome');
+        
+        console.log('SteamUserManager: Элемент приветствия:', {
+            found: !!welcomeElement,
+            element: welcomeElement,
+            innerHTML: welcomeElement ? welcomeElement.innerHTML : 'N/A',
+            style: welcomeElement ? welcomeElement.style.cssText : 'N/A'
+        });
+
+        if (welcomeElement && userName) {
+            const welcomeText = `Привет, ${userName}!`;
+            console.log('SteamUserManager: Устанавливаем текст приветствия:', welcomeText);
+            
+            // Устанавливаем текст
+            welcomeElement.textContent = welcomeText;
+            
+            // Применяем стили
+            welcomeElement.style.display = 'block';
+            welcomeElement.style.color = '#00d4ff';
+            welcomeElement.style.textShadow = '0 0 10px rgba(0, 212, 255, 0.5)';
+            welcomeElement.style.fontSize = '24px';
+            welcomeElement.style.fontWeight = 'bold';
+            welcomeElement.style.textAlign = 'center';
+            welcomeElement.style.margin = '1rem 0';
+            
+            // Добавляем анимацию появления
+            welcomeElement.style.opacity = '0';
+            welcomeElement.style.transform = 'translateY(-10px)';
+            welcomeElement.style.transition = 'all 0.3s ease';
+            
+            // Запускаем анимацию через небольшую задержку
+            setTimeout(() => {
+                welcomeElement.style.opacity = '1';
+                welcomeElement.style.transform = 'translateY(0)';
+            }, 100);
+            
+            console.log('SteamUserManager: Приветствие успешно установлено');
+            console.log('SteamUserManager: Итоговый стиль элемента:', welcomeElement.style.cssText);
+            console.log('SteamUserManager: Итоговый текст элемента:', welcomeElement.textContent);
+        } else {
+            console.error('SteamUserManager: НЕ УДАЛОСЬ НАЙТИ ЭЛЕМЕНТ ПРИВЕТСТВИЯ ИЛИ ИМЯ ПОЛЬЗОВАТЕЛЯ');
+            console.error('SteamUserManager: welcomeElement:', welcomeElement);
+            console.error('SteamUserManager: userName:', userName);
+            
+            // Попытка создать элемент, если его нет
+            if (!welcomeElement && userName) {
+                console.log('SteamUserManager: Попытка создать элемент приветствия');
+                this.createWelcomeElement(userName);
+            }
+        }
+    }
+
+    /**
+     * НОВЫЙ МЕТОД: Создание элемента приветствия, если он не найден
+     */
+    createWelcomeElement(userName) {
+        const heroSection = document.querySelector('.hero-section');
+        const heroContent = document.querySelector('.hero-content');
+        
+        if (heroContent || heroSection) {
+            const welcomeElement = document.createElement('p');
+            welcomeElement.id = 'steam-welcome';
+            welcomeElement.textContent = `Привет, ${userName}!`;
+            welcomeElement.style.cssText = `
+                font-size: 24px; 
+                font-weight: bold; 
+                color: #00d4ff; 
+                text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+                text-align: center;
+                margin: 1rem 0;
+                display: block;
+            `;
+            
+            if (heroContent) {
+                heroContent.insertBefore(welcomeElement, heroContent.firstChild);
+            } else {
+                heroSection.insertBefore(welcomeElement, heroSection.firstChild);
+            }
+            
+            this.steamWelcome = welcomeElement;
+            console.log('SteamUserManager: Элемент приветствия создан и добавлен на страницу');
+        } else {
+            console.error('SteamUserManager: Не найдены hero-section или hero-content для добавления приветствия');
+        }
     }
 
     /**
@@ -1034,21 +1117,20 @@ class SteamUserManager {
     showLoginState() {
         console.log('SteamUserManager: Переключение в состояние "не залогинен"');
         
-        // Показываем кнопку входа
         Utils.toggleVisibility('.join-steam-btn', true);
-        
-        // Скрываем кнопку выхода
         Utils.toggleVisibility('#steam-logout', false);
         
-        // Скрываем аватар
         if (this.steamAvatar) {
             this.steamAvatar.style.display = 'none';
             this.steamAvatar.src = '';
         }
         
         // Очищаем приветствие
-        if (this.steamWelcome) {
-            this.steamWelcome.textContent = '';
+        const welcomeElement = this.steamWelcome || Utils.$('#steam-welcome');
+        if (welcomeElement) {
+            welcomeElement.textContent = '';
+            welcomeElement.style.display = 'none';
+            console.log('SteamUserManager: Приветствие очищено');
         }
     }
 
@@ -1058,10 +1140,7 @@ class SteamUserManager {
     showLogoutState() {
         console.log('SteamUserManager: Переключение в состояние "залогинен"');
         
-        // Скрываем кнопку входа
         Utils.toggleVisibility('.join-steam-btn', false);
-        
-        // Показываем кнопку выхода
         Utils.toggleVisibility('#steam-logout', true);
     }
 
@@ -1071,10 +1150,9 @@ class SteamUserManager {
     logout() {
         console.log('SteamUserManager: Выход из аккаунта');
         
-        localStorage.removeItem("steamId"); // Удаляем ID из хранилища
-        this.showLoginState(); // Переключаемся в состояние "не залогинен"
+        localStorage.removeItem("steamId");
+        this.showLoginState();
         
-        // Показываем уведомление
         alert('Вы успешно вышли из аккаунта');
     }
 }
