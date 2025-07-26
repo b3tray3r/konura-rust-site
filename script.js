@@ -858,7 +858,7 @@ class SteamUserManager {
      */
     getSteamIdFromURL() {
         const params = new URLSearchParams(window.location.search);
-        return params.get('steamid');
+        return params.get('steamId');
     }
 
     /**
