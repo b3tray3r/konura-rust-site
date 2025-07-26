@@ -1279,3 +1279,6 @@ body {
     transform: scale(1);
   }
 }
+#steam-avatar, #steam-welcome {
+  display: none;
+}

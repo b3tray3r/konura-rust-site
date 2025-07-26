@@ -437,7 +437,7 @@ class StatsManager {
         const discordBtn = Utils.$('#discord-join');
         if (discordBtn) {
             discordBtn.addEventListener('click', () => {
-                window.open('https://discord.gg/PhDmKZ67', '_blank');
+                window.open('https://discord.gg/pYR8brsq5W', '_blank');
             });
         }
     }
@@ -680,9 +680,9 @@ class YouTubeManager {
     }
 
     extractVideoId(url) {
-            const match = url.match(/v=([^&]+)/);
-            return match ? match[1] : '';
-        }
+        const match = url.match(/v=([^&]+)/);
+        return match ? match[1] : '';
+    }
 
     async init() {
         if (!this.container) return;
@@ -693,7 +693,7 @@ class YouTubeManager {
             Utils.logError('YouTubeManager', 'Ошибка инициализации YouTube: ' + error);
             this.showYouTubeError();
         }
-        
+
     }
 
     /**
@@ -1064,28 +1064,31 @@ class NeonTransitionManager {
 
 // Инициализация
 window.addEventListener("DOMContentLoaded", async () => {
-  const steamId = localStorage.getItem("steamId");
+    const steamId = localStorage.getItem("steamId");
 
-  if (!steamId) return;
+    if (!steamId) return;
 
-  try {
-    const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
-    if (!res.ok) throw new Error("Пользователь не найден");
+    try {
+        const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
+        if (!res.ok) throw new Error("Пользователь не найден");
 
-    const user = await res.json();
+        const user = await res.json();
+        
+        // Показываем ник
+        const welcome = document.getElementById("steam-welcome");
+        welcome.textContent = `Привет, ${user.name}`;
+        welcome.style.display = "block";
 
-    // Показываем ник
-    const welcome = document.getElementById("steam-welcome");
-    welcome.textContent = `Привет, ${user.name}`;
+        // Показываем аватар
+        const avatar = document.getElementById("steam-avatar");
+        avatar.src = user.avatar;
+        avatar.style.display = "inline-block";
 
-    // Показываем аватар
-    const avatar = document.getElementById("steam-avatar");
-    avatar.src = user.avatar;
-    avatar.style.display = "inline-block";
-
-  } catch (err) {
-    console.error("Ошибка загрузки профиля:", err);
-  }
+    } catch (err) {
+        console.error("Ошибка загрузки профиля:", err);
+        document.getElementById("steam-welcome").style.display = "none";
+        document.getElementById("steam-avatar").style.display = "none";
+    }
 });
 
 
@@ -1094,16 +1097,16 @@ async function fetchSteamUserInfo() {
     if (!steamId) return;
 
     try {
-      const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
-      if (!res.ok) throw new Error("Не удалось загрузить профиль");
-      const user = await res.json();
-
-      const welcomeElement = document.getElementById("steam-welcome");
-      welcomeElement.textContent = `Привет, ${user.name}`;
-      document.getElementById("steam-avatar").src = user.avatar;
+        const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
+        if (!res.ok) throw new Error("Не удалось загрузить профиль");
+        const user = await res.json();
+        
+        const welcomeElement = document.getElementById("steam-welcome");
+        welcomeElement.textContent = `Привет, ${user.name}`;
+        document.getElementById("steam-avatar").src = user.avatar;
     } catch (e) {
-      console.error(e);
+        console.error(e);
     }
-  }
+}
 
-  fetchSteamUserInfo();
+fetchSteamUserInfo();
