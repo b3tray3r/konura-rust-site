@@ -1246,24 +1246,8 @@ body {
   border-radius: 50%;
   position: relative;
   z-index: 0;
-  /* Для плавности ауры */
-  animation: pulseAura 2s infinite;
 }
 
-.steam-avatar-img::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  left: -6px;
-  width: 64px;  /* 64 + 8 + 8 */
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(255, 165, 0, 1); /* оранжевый с прозрачностью */
-  filter: blur(20px);
-  opacity: 1;
-  animation: pulseAura 2s infinite;
-  z-index: -1;
-}
 
 @keyframes pulseAura {
   0% {
