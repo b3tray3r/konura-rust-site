@@ -1063,19 +1063,31 @@ class NeonTransitionManager {
 }
 
 // Инициализация
-document.addEventListener('DOMContentLoaded', () => {
-    const neonTransition = new NeonTransitionManager();
+window.addEventListener("DOMContentLoaded", async () => {
+  const steamId = localStorage.getItem("steamId");
+
+  if (!steamId) return;
+
+  try {
+    const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
+    if (!res.ok) throw new Error("Пользователь не найден");
+
+    const user = await res.json();
+
+    // Показываем ник
+    const welcome = document.getElementById("steam-welcome");
+    welcome.textContent = `Привет, ${user.name}`;
+
+    // Показываем аватар
+    const avatar = document.getElementById("steam-avatar");
+    avatar.src = user.avatar;
+    avatar.style.display = "inline-block";
+
+  } catch (err) {
+    console.error("Ошибка загрузки профиля:", err);
+  }
 });
 
-const urlParams = new URLSearchParams(window.location.search);
-  const steamId = urlParams.get('steamId');
-
-  // Если есть, сохраняем в localStorage
-  if (steamId) {
-    localStorage.setItem('steamId', steamId);
-    // Чистим URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
 
 async function fetchSteamUserInfo() {
     const steamId = localStorage.getItem('steamId');
