@@ -778,16 +778,39 @@ class YouTubeManager {
 }
 
 // ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
+// ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ STEAM =====
 class SteamUserManager {
     constructor() {
         this.userInfo = Utils.$('#user-info');
+        this.loginButton = Utils.$('#steam-login'); // Предполагаемый ID кнопки входа
+        this.logoutButton = Utils.$('#steam-logout'); // ID кнопки выхода
         this.init();
     }
 
     async init() {
         const steamId = this.getSteamIdFromURL();
         if (steamId) {
+            // Если SteamID есть в URL, значит это возврат после авторизации
+            localStorage.setItem("steamId", steamId); // Сохраняем ID
+            history.replaceState({}, document.title, "/"); // Опционально: убираем steamid из URL
             await this.fetchAndDisplayUser(steamId);
+        } else {
+            // Проверяем, есть ли сохраненный ID (пользователь уже залогинен)
+            const savedSteamId = localStorage.getItem("steamId");
+            if (savedSteamId) {
+                await this.fetchAndDisplayUser(savedSteamId);
+            } else {
+                // Пользователь не залогинен
+                this.hideUserInfo();
+            }
+        }
+
+        // Добавляем обработчик события для кнопки выхода
+        if (this.logoutButton) {
+            this.logoutButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.logout();
+            });
         }
     }
 
@@ -806,8 +829,11 @@ class SteamUserManager {
         try {
             const userData = await APIManager.getSteamUserData(steamId);
             this.displayUserInfo(userData);
+            this.showLogoutState(); // Показываем состояние "залогинен"
         } catch (error) {
             Utils.logError('SteamUserManager', 'Ошибка получения данных пользователя: ' + error);
+            this.hideUserInfo();
+            this.showLoginState(); // В случае ошибки показываем состояние "не залогинен"
         }
     }
 
@@ -815,12 +841,66 @@ class SteamUserManager {
      * Отображение информации о пользователе
      */
     displayUserInfo(userData) {
+        if (!userData || !userData.name) {
+             console.warn("SteamUserManager: Invalid user data received");
+             this.hideUserInfo();
+             return;
+        }
         Utils.updateText('#username', userData.name);
         Utils.updateAttribute('#user-avatar', 'src', userData.avatar);
         Utils.updateAttribute('#user-profile', 'href', userData.profile);
-
         // Показываем блок с информацией о пользователе
         Utils.toggleVisibility('#user-info', true);
+        console.log("SteamUserManager: User info displayed successfully");
+    }
+
+    /**
+     * Скрываем информацию о пользователе и показываем кнопку входа
+     */
+    hideUserInfo() {
+        Utils.toggleVisibility('#user-info', false);
+        this.showLoginState();
+    }
+
+    /**
+     * Показываем состояние "залогинен": скрываем кнопку входа, показываем кнопку выхода
+     */
+    showLogoutState() {
+        if (this.loginButton) {
+            // this.loginButton.style.display = 'none'; // Используя стиль
+            Utils.toggleVisibility('#steam-login', false); // Используя утилиту (предполагает наличие класса .hidden)
+        }
+        if (this.logoutButton) {
+            // this.logoutButton.style.display = 'block'; // Используя стиль
+             Utils.toggleVisibility('#steam-logout', true); // Используя утилиту
+        }
+    }
+
+    /**
+     * Показываем состояние "не залогинен": показываем кнопку входа, скрываем кнопку выхода
+     */
+    showLoginState() {
+        if (this.loginButton) {
+             Utils.toggleVisibility('#steam-login', true);
+            // this.loginButton.style.display = 'block';
+        }
+        if (this.logoutButton) {
+             Utils.toggleVisibility('#steam-logout', false);
+            // this.logoutButton.style.display = 'none';
+        }
+    }
+
+    /**
+     * Выход из аккаунта
+     */
+    logout() {
+        localStorage.removeItem("steamId"); // Удаляем ID из хранилища
+        this.hideUserInfo(); // Скрываем информацию о пользователе
+        this.showLoginState(); // Показываем кнопку входа
+         // Если вы используете глобальную переменную для steamId, как в закомментированном коде,
+         // её также нужно удалить или установить в null
+         // window.steamId = null; // Пример, если такая переменная существует
+         console.log("Пользователь вышел из аккаунта");
     }
 }
 
@@ -1062,51 +1142,4 @@ class NeonTransitionManager {
     }
 }
 
-// Инициализация
-window.addEventListener("DOMContentLoaded", async () => {
-    const steamId = localStorage.getItem("steamId");
 
-    if (!steamId) return;
-
-    try {
-        const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
-        if (!res.ok) throw new Error("Пользователь не найден");
-
-        const user = await res.json();
-        
-        // Показываем ник
-        const welcome = document.getElementById("steam-welcome");
-        welcome.textContent = `Привет, ${user.name}`;
-        welcome.style.display = "block";
-
-        // Показываем аватар
-        const avatar = document.getElementById("steam-avatar");
-        avatar.src = user.avatar;
-        avatar.style.display = "inline-block";
-
-    } catch (err) {
-        console.error("Ошибка загрузки профиля:", err);
-        document.getElementById("steam-welcome").style.display = "none";
-        document.getElementById("steam-avatar").style.display = "none";
-    }
-});
-
-
-async function fetchSteamUserInfo() {
-    const steamId = localStorage.getItem('steamId');
-    if (!steamId) return;
-
-    try {
-        const res = await fetch(`https://ktor-server-u2py.onrender.com/steam/userinfo/${steamId}`);
-        if (!res.ok) throw new Error("Не удалось загрузить профиль");
-        const user = await res.json();
-        
-        const welcomeElement = document.getElementById("steam-welcome");
-        welcomeElement.textContent = `Привет, ${user.name}`;
-        document.getElementById("steam-avatar").src = user.avatar;
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-fetchSteamUserInfo();
