@@ -261,15 +261,47 @@ body {
   transform: translateY(-1px);
 }
 
-.steam-login-btn img {
-  height: 36px;
-  width: auto;
-  transition: transform var(--transition-fast);
+/* ===== STEAM-КНОПКА ===== */
+
+.join-steam-btn {
+  background: linear-gradient(135deg, #1b2838, #2a475e);
+  color: #ffffff;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: var(--border-radius-small);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 }
 
-.steam-login-btn:hover img {
-  transform: scale(1.1);
+.join-steam-btn:hover {
+  background: linear-gradient(135deg, #171a21, #2a475e);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
+
+.join-steam-btn .btn-icon {
+  display: flex;
+  align-items: center;
+  margin-right: var(--spacing-xs);
+}
+
+/* Иконка Steam */
+.steam-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+
+
+
 
 /* ===== ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ ===== */
 .user-info {
@@ -563,6 +595,11 @@ body {
 .metric-value {
   font-size: 1.5rem;
   color: var(--text-primary);
+}
+
+.metric-value-online {
+    font-size: 1.5rem;
+    color: var(--success-color);
 }
 
 /* ===== КАРТА ===== */

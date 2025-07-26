@@ -23,7 +23,7 @@ const CONFIG = {
 
     // Update intervals (in milliseconds)
     INTERVALS: {
-        STATS_UPDATE: 30000,      // 30 seconds
+        STATS_UPDATE: 120000,      // 30 seconds
         WIPE_TIME_UPDATE: 1000,   // 1 second
         RETRY_DELAY: 5000         // 5 seconds on error
     },
