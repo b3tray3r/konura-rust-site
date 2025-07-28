@@ -1,268 +1,259 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Магазин - Konura Rust</title>
-    <link rel="stylesheet" href="file:///C:/Users/Michael/Desktop/rust-site/shop/shop-styles.css">
+    <meta name="description" content="KONURA RUST - Магазин сервера. Приобретайте VIP статусы, предметы и наборы.">
+    <title>KONURA RUST - Магазин</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="shop/shop-styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="../public/favicon.svg" type="image/svg+xml">
 </head>
+
 <body>
-    <!-- Background Video -->
-    <div class="background-video">
-        <video autoplay muted loop>
-            <source src="file:///C:/Users/Michael/Desktop/rust-site/dome.mp4" type="video/mp4">
+    <!-- Видео фон -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline preload="metadata">
+            <source src="assets/outpost.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
         </video>
         <div class="video-overlay"></div>
     </div>
 
-    <!-- Header -->
-    <header class="header">
+    <!-- Навигация -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="https://b3tray3r.github.io/konura-rust-site/" class="logo">
+                <span class="logo-text">KONURA</span>
+            </a>
+            <!-- Аватар пользователя Steam -->
+            <img class="steam-avatar-img" id="steam-avatar" style="display: none;" />
+            <div class="nav-links" id="nav-links">
+                <a href="https://b3tray3r.github.io/konura-rust-site/" class="nav-link">Главная</a>
+                <a  class="nav-link">О сервере</a>
+                <a href="shop/shop.html" class="nav-link active">Магазин</a>
+                <a  class="nav-link">Контакты</a>
+            </div>
+
+            <div class="nav-actions">
+                <a href="steam://connect/203.16.163.232:28834" class="join-server-btn" id="join-server">
+                    <span class="btn-icon">🎮</span>
+                    Подключиться
+                </a>
+                <!-- Кнопка входа через Steam -->
+                <a href="https://ktor-server-u2py.onrender.com/steam/login" class="join-server-btn join-steam-btn"
+                    title="Войти через Steam">
+                    <span class="btn-icon"><img class="steam-icon"
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/250px-Steam_icon_logo.svg.png"
+                            alt="Steam"></span>
+                    Steam Login
+                </a>
+                <!-- Кнопка выхода (изначально скрыта) -->
+                <button id="steam-logout" class="join-server-btn" style="display: none;">
+                    <span class="btn-icon">🚪</span>
+                    Выйти
+                </button>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobile-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Главная секция магазина -->
+    <section class="shop-hero">
         <div class="container">
-            <div class="nav-brand">
-                <a href="../" class="logo">KONURA RUST</a>
-            </div>
-            <nav class="nav-menu">
-                <a href="../" class="nav-link">Главная</a>
-                <a href="#" class="nav-link active">Магазин</a>
-                <a href="#" class="nav-link">О нас</a>
-                <a href="#" class="nav-link">Подключиться</a>
-            </nav>
-            <div class="mobile-menu-button" onclick="toggleMobileMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
+            <div class="shop-hero-content">
+                <h1 class="shop-title">
+                    МАГАЗИН <span class="rust-text">KONURA</span>
+                </h1>
+                <!-- Приветствие пользователя Steam -->
+                <p id="steam-welcome" style="font-size: 24px; font-weight: bold;"></p>
+                <p class="shop-subtitle">
+                    Улучши свой игровой опыт с помощью VIP статусов, уникальных предметов и наборов выживания
+                </p>
             </div>
         </div>
-    </header>
+    </section>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="container">
-                <h1 class="hero-title">МАГАЗИН KONURA</h1>
-                <p class="hero-subtitle">Получите преимущества в выживании</p>
+    <!-- Категории товаров -->
+    <section class="shop-categories">
+        <div class="container">
+            <div class="categories-nav">
+                <button class="category-btn active" data-category="subscriptions">
+                    <span class="category-icon">⭐</span>
+                    Подписки
+                </button>
+                <button class="category-btn" data-category="items">
+                    <span class="category-icon">🔧</span>
+                    Предметы
+                </button>
+                <button class="category-btn" data-category="access">
+                    <span class="category-icon">🔑</span>
+                    Доступы
+                </button>
+                <button class="category-btn" data-category="kits">
+                    <span class="category-icon">📦</span>
+                    Наборы
+                </button>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Shop Categories -->
-        <section class="shop-categories">
-            <div class="container">
-                <div class="category-tabs">
-                    <button class="tab-button active" data-category="vip">VIP Подписки</button>
-                    <button class="tab-button" data-category="items">Предметы</button>
-                    <button class="tab-button" data-category="access">Доступы</button>
-                    <button class="tab-button" data-category="kits">Наборы</button>
-                </div>
+    <!-- Товары -->
+    <section class="shop-products">
+        <div class="container">
+            <div class="products-grid" id="products-grid">
+                <!-- Динамически загружаемые товары -->
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Products Grid -->
-        <section class="products-section">
-            <div class="container">
-                <!-- VIP Subscriptions -->
-                <div class="products-grid" id="vip">
-                    <div class="product-card featured">
-                        <div class="product-badge">Популярный</div>
-                        <div class="product-header">
-                            <h3 class="product-title">VIP GOLD</h3>
-                            <div class="product-price">
-                                <span class="price-current">899₽</span>
-                                <span class="price-period">/месяц</span>
-                            </div>
-                        </div>
-                        <div class="product-features">
-                            <div class="feature">✓ Приоритетная очередь</div>
-                            <div class="feature">✓ 2x опыт и ресурсы</div>
-                            <div class="feature">✓ Эксклюзивные скины</div>
-                            <div class="feature">✓ VIP чат</div>
-                            <div class="feature">✓ Телепортация домой</div>
-                            <div class="feature">✓ Увеличенный инвентарь</div>
-                        </div>
-                        <button class="buy-button" onclick="selectProduct('vip-gold', 899)">Купить</button>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-header">
-                            <h3 class="product-title">VIP SILVER</h3>
-                            <div class="product-price">
-                                <span class="price-current">599₽</span>
-                                <span class="price-period">/месяц</span>
-                            </div>
-                        </div>
-                        <div class="product-features">
-                            <div class="feature">✓ 1.5x опыт</div>
-                            <div class="feature">✓ Базовые скины</div>
-                            <div class="feature">✓ VIP чат</div>
-                            <div class="feature">✓ Телепортация домой</div>
-                        </div>
-                        <button class="buy-button" onclick="selectProduct('vip-silver', 599)">Купить</button>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-header">
-                            <h3 class="product-title">VIP BRONZE</h3>
-                            <div class="product-price">
-                                <span class="price-current">299₽</span>
-                                <span class="price-period">/месяц</span>
-                            </div>
-                        </div>
-                        <div class="product-features">
-                            <div class="feature">✓ 1.2x опыт</div>
-                            <div class="feature">✓ VIP чат</div>
-                            <div class="feature">✓ Цветной никнейм</div>
-                        </div>
-                        <button class="buy-button" onclick="selectProduct('vip-bronze', 299)">Купить</button>
-                    </div>
+    <!-- Информация о покупке -->
+    <section class="purchase-info">
+        <div class="container">
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="info-icon">💳</div>
+                    <h3>Безопасная оплата</h3>
+                    <p>Принимаем карты, электронные кошельки и криптовалюту</p>
                 </div>
-
-                <!-- Items -->
-                <div class="products-grid hidden" id="items">
-                    <div class="product-card">
-                        <div class="product-header">
-                            <h3 class="product-title">AK-47 Скин</h3>
-                            <div class="product-price">
-                                <span class="price-current">199₽</span>
-                            </div>
-                        </div>
-                        <div class="product-features">
-                            <div class="feature">✓ Эксклюзивный дизайн</div>
-                            <div class="feature">✓ Навсегда</div>
-                        </div>
-                        <button class="buy-button" onclick="selectProduct('ak47-skin', 199)">Купить</button>
-                    </div>
-
-                    <div class="product-card">
-                        <div class="product-header">
-                            <h3 class="product-title">Набор ресурсов</h3>
-                            <div class="product-price">
-                                <span class="price-current">99₽</span>
-                            </div>
-                        </div>
-                        <div class="product-features">
-                            <div class="feature">✓ 10000 древесины</div>
-                            <div class="feature">✓ 5000 камня</div>
-                            <div class="feature">✓ 2000 металла</div>
-                        </div>
-                        <button class="buy-button" onclick="selectProduct('resources', 99)">Купить</button>
-                    </div>
+                <div class="info-card">
+                    <div class="info-icon">⚡</div>
+                    <h3>Мгновенная выдача</h3>
+                    <p>Товары выдаются автоматически после оплаты</p>
                 </div>
-
-                <!-- Access -->
-                <div class="products-grid hidden" id="access">
-                    <div class="product-card">
-                        <div class="product-header">
-                            <h3 class="product-title">Админ-зона</h3>
-                            <div class="product-price">
-                                <span class="price-current">1999₽</span>
-                                <span class="price-period">/месяц</span>
-                            </div>
-                        </div>
-                        <div class="product-features">
-                            <div class="feature">✓ Доступ к админ командам</div>
-                            <div class="feature">✓ Креативный режим</div>
-                            <div class="feature">✓ Телепортация к игрокам</div>
-                        </div>
-                        <button class="buy-button" onclick="selectProduct('admin-access', 1999)">Купить</button>
-                    </div>
+                <div class="info-card">
+                    <div class="info-icon">🛡️</div>
+                    <h3>Гарантия качества</h3>
+                    <p>Возврат средств в случае технических проблем</p>
                 </div>
-
-                <!-- Kits -->
-                <div class="products-grid hidden" id="kits">
-                    <div class="product-card">
-                        <div class="product-header">
-                            <h3 class="product-title">Стартовый набор</h3>
-                            <div class="product-price">
-                                <span class="price-current">149₽</span>
-                            </div>
-                        </div>
-                        <div class="product-features">
-                            <div class="feature">✓ Полный комплект брони</div>
-                            <div class="feature">✓ Оружие</div>
-                            <div class="feature">✓ Еда и медикаменты</div>
-                            <div class="feature">✓ Инструменты</div>
-                        </div>
-                        <button class="buy-button" onclick="selectProduct('starter-kit', 149)">Купить</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Payment Modal -->
-        <div class="modal-overlay" id="paymentModal">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3>Оформление покупки</h3>
-                    <button class="modal-close" onclick="closeModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="selected-product">
-                        <h4 id="selectedProductName">VIP GOLD</h4>
-                        <div class="product-total">
-                            <span>Итого: </span>
-                            <span id="selectedProductPrice">899₽</span>
-                        </div>
-                    </div>
-                    <form class="payment-form">
-                        <div class="form-group">
-                            <label for="playerName">Ник в игре</label>
-                            <input type="text" id="playerName" required placeholder="Введите ваш ник">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" required placeholder="your@email.com">
-                        </div>
-                        <div class="payment-methods">
-                            <label class="payment-method">
-                                <input type="radio" name="payment" value="card" checked>
-                                <span>Банковская карта</span>
-                            </label>
-                            <label class="payment-method">
-                                <input type="radio" name="payment" value="qiwi">
-                                <span>QIWI</span>
-                            </label>
-                            <label class="payment-method">
-                                <input type="radio" name="payment" value="yoomoney">
-                                <span>ЮMoney</span>
-                            </label>
-                        </div>
-                        <button type="submit" class="payment-button">Оплатить</button>
-                    </form>
+                <div class="info-card">
+                    <div class="info-icon">📞</div>
+                    <h3>Поддержка 24/7</h3>
+                    <p>Онлайн поддержка в Discord и Telegram</p>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <!-- Footer -->
-    <footer class="footer">
+    <!-- Футер -->
+    <footer id="connect" class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h4>KONURA RUST</h4>
-                    <p>Лучший сервер выживания</p>
+                    <h3 class="footer-title">KONURA RUST</h3>
+                    <p class="footer-description">
+                        Интенсивные PvP бои, строительство и выживание.
+                    </p>
+                    <div class="social-icons">
+                        <a href="https://www.youtube.com/@KonuraRust" class="social-link youtube" title="YouTube">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png"
+                                alt="YouTube">
+                        </a>
+                        <a href="https://t.me/konurarust" class="social-link telegram" title="Telegram">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/2048px-Telegram_logo.svg.png"
+                                alt="Telegram">
+                        </a>
+                        <a href="https://discord.gg/pYR8brsq5W" class="social-link discord" title="Discord">
+                            <img src="https://upload.wikimedia.org/wikipedia/fr/thumb/4/4f/Discord_Logo_sans_texte.svg/1818px-Discord_Logo_sans_texte.png"
+                                alt="Discord">
+                        </a>
+                    </div>
                 </div>
+
                 <div class="footer-section">
-                    <h4>Ссылки</h4>
-                    <a href="#" class="footer-link">YouTube</a>
-                    <a href="#" class="footer-link">Telegram</a>
-                    <a href="#" class="footer-link">Discord</a>
+                    <h3 class="footer-title">Быстрые ссылки</h3>
+                    <ul class="footer-links">
+                        <li><a href="../index.html">Главная</a></li>
+                        <li><a href="../index.html#about">О сервере</a></li>
+                        <li><a href="shop.html">Магазин</a></li>
+                        <li><a href="../index.html#connect">Discord</a></li>
+                    </ul>
                 </div>
+
                 <div class="footer-section">
-                    <h4>Поддержка</h4>
-                    <a href="#" class="footer-link">Помощь</a>
-                    <a href="#" class="footer-link">Контакты</a>
+                    <h3 class="footer-title">Поддержка</h3>
+                    <ul class="footer-links">
+                        <li><a href="#help">Помощь</a></li>
+                        <li><a href="#bugs">Сообщить об ошибке</a></li>
+                        <li><a href="#admin">Администратор</a></li>
+                        <li><a href="#appeals">Апелляция</a></li>
+                    </ul>
                 </div>
             </div>
+
             <div class="footer-bottom">
-                <p>&copy; 2024 Konura Rust. Все права защищены.</p>
+                <div class="footer-bottom-content">
+                    <p class="copyright">&copy; 2024 Konura Rust. Все права защищены.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#privacy">Конфиденциальность</a>
+                        <a href="#terms">Условия</a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
 
-    <script src="scripts.js"></script>
+    <!-- Модальное окно покупки -->
+    <div class="modal-overlay" id="purchase-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Покупка товара</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="product-preview">
+                    <div class="product-image">
+                        <div class="product-icon" id="modal-icon">🎁</div>
+                    </div>
+                    <div class="product-details">
+                        <h4 id="modal-product-name">Название товара</h4>
+                        <p id="modal-product-description">Описание товара</p>
+                        <div class="product-features" id="modal-features">
+                            <!-- Преимущества товара -->
+                        </div>
+                    </div>
+                </div>
+                <div class="purchase-form">
+                    <div class="price-info">
+                        <span class="price-label">Цена:</span>
+                        <span class="price-value" id="modal-price">0 ₽</span>
+                    </div>
+                    <div class="payment-methods">
+                        <h5>Способы оплаты:</h5>
+                        <div class="payment-options">
+                            <button class="payment-btn" data-method="card">
+                                <span>💳</span>
+                                Банковская карта
+                            </button>
+                            <button class="payment-btn" data-method="qiwi">
+                                <span>🥝</span>
+                                QIWI
+                            </button>
+                            <button class="payment-btn" data-method="yoomoney">
+                                <span>💰</span>
+                                ЮMoney
+                            </button>
+                        </div>
+                    </div>
+                    <button class="purchase-btn" id="confirm-purchase">
+                        <span class="btn-icon">🛒</span>
+                        Купить сейчас
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="../script.js"></script>
+    <script src="shop-script.js"></script>
 </body>
+
 </html>
