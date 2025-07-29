@@ -222,17 +222,19 @@ class ShopManager {
         this.modalClose = document.getElementById('modal-close');
         this.selectedPaymentMethod = null;
         
+        // Добавьте свойство для IntersectionObserver
+        this.productCardObserver = null; 
+
         this.init();
     }
 
     init() {
         this.setupCategoryNavigation();
         this.setupModalHandlers();
+        // Изначально рендерим товары и сразу наблюдаем за ними
         this.renderProducts(this.currentCategory);
+        this.observeProductCards(); // Вызываем наблюдение после рендеринга
         this.setupPaymentMethods();
-        
-        // Анимация появления элементов
-        this.setupAnimations();
     }
 
     /**
@@ -258,16 +260,25 @@ class ShopManager {
             btn.classList.toggle('active', btn.dataset.category === category);
         });
 
-        // Анимация смены товаров
+        // Обеспечиваем плавный переход для всего контейнера товаров
+        this.productsGrid.style.transition = `opacity ${SHOP_CONFIG.ANIMATION.TRANSITION_DURATION}ms ease, transform ${SHOP_CONFIG.ANIMATION.TRANSITION_DURATION}ms ease`;
         this.productsGrid.style.opacity = '0';
         this.productsGrid.style.transform = 'translateY(20px)';
+        this.productsGrid.style.pointerEvents = 'none'; // Отключаем взаимодействие на время перехода
+
+        // Отключаем текущий наблюдатель, чтобы старые карточки не вызывали анимацию
+        if (this.productCardObserver) {
+            this.productCardObserver.disconnect();
+        }
 
         setTimeout(() => {
             this.currentCategory = category;
-            this.renderProducts(category);
+            this.renderProducts(category); // Рендерим новые товары
+            this.observeProductCards(); // Снова начинаем наблюдать за новыми товарами
             
             this.productsGrid.style.opacity = '1';
             this.productsGrid.style.transform = 'translateY(0)';
+            this.productsGrid.style.pointerEvents = 'auto'; // Включаем взаимодействие
         }, SHOP_CONFIG.ANIMATION.TRANSITION_DURATION);
     }
 
@@ -295,8 +306,8 @@ class ShopManager {
      */
     createProductCard(product, index) {
         const card = document.createElement('div');
+        // card.style.animationDelay = `${index * SHOP_CONFIG.ANIMATION.CARD_DELAY}ms`; // Эту строку удаляем/закомментируем, т.к. управляем через transition-delay в JS
         card.className = `product-card ${product.class || ''}`;
-        card.style.animationDelay = `${index * SHOP_CONFIG.ANIMATION.CARD_DELAY}ms`;
 
         const durationHTML = product.duration ? 
             `<div class="product-duration">Срок действия: ${product.duration}</div>` : '';
@@ -333,6 +344,7 @@ class ShopManager {
      * Настройка обработчиков модального окна
      */
     setupModalHandlers() {
+        // ... (ваш существующий код) ...
         // Закрытие модального окна
         this.modalClose.addEventListener('click', () => this.closePurchaseModal());
         this.modal.addEventListener('click', (e) => {
@@ -357,6 +369,7 @@ class ShopManager {
      * Открытие модального окна покупки
      */
     openPurchaseModal(product) {
+        // ... (ваш существующий код) ...
         // Заполняем данные товара
         document.getElementById('modal-title').textContent = `Покупка: ${product.name}`;
         document.getElementById('modal-icon').textContent = product.icon;
@@ -486,36 +499,46 @@ class ShopManager {
     }
 
     /**
-     * Настройка анимаций
+     * Наблюдает за карточками товаров для плавного появления при входе в область видимости.
      */
-    setupAnimations() {
-        // Intersection Observer для анимации появления карточек
-        const observer = new IntersectionObserver((entries) => {
+    observeProductCards() {
+        // Отключаем предыдущий наблюдатель, если он существует
+        if (this.productCardObserver) {
+            this.productCardObserver.disconnect();
+        }
+
+        this.productCardObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
+                    // Применяем эффект появления
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
+                    
+                    // Прекращаем наблюдение за карточкой после того, как она появилась
+                    this.productCardObserver.unobserve(entry.target);
                 }
             });
         }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+            threshold: 0.1, // Срабатывает, когда 10% элемента видно
+            rootMargin: '0px 0px -50px 0px' // Начинает наблюдать немного раньше для более плавного появления
         });
 
-        // Наблюдаем за карточками товаров
-        const observeCards = () => {
-            document.querySelectorAll('.product-card').forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)';
-                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                observer.observe(card);
-            });
-        };
-
-        // Запускаем наблюдение с задержкой
-        setTimeout(observeCards, 100);
+        // Инициализируем начальное скрытое состояние и начинаем наблюдать за всеми текущими карточками товаров
+        document.querySelectorAll('.product-card').forEach((card, index) => {
+            // Устанавливаем начальное скрытое состояние
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            // Применяем переход с задержкой для "стаггер" эффекта
+            card.style.transition = `opacity 0.6s ease ${index * SHOP_CONFIG.ANIMATION.CARD_DELAY}ms, transform 0.6s ease ${index * SHOP_CONFIG.ANIMATION.CARD_DELAY}ms`;
+            
+            // Начинаем наблюдение за карточкой
+            this.productCardObserver.observe(card);
+        });
     }
 }
+
+// ... (остальной код остается без изменений) ...
+
 
 // ===== УТИЛИТЫ ДЛЯ ФОРМАТИРОВАНИЯ =====
 class ShopUtils {

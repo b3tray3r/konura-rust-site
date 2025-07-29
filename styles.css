@@ -228,7 +228,7 @@ body {
 
 .cta-button.primary,
 .join-server-btn {
-  background: linear-gradient(135deg, var(--primary-color), #ff8c5a);
+  background: var(--primary-color);
   color: var(--text-primary);
   box-shadow: var(--shadow-sm);
 }
