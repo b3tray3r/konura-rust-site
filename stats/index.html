@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="KONURA RUST - Статистика игроков, рейтинги и достижения на сервере.">
+    <title>KONURA RUST - Статистика игроков</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../stats/stats-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+</head>
+
+<body>
+    <!-- Видео фон -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline preload="metadata">
+            <source src="../assets/mountain.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <!-- Навигация -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <img src="../assets/logo.png" alt="KONURA RUST Logo" class="logo" style="width: 60px; height: 60px; 
+                margin-right: -60px;">
+            <div href="https://b3tray3r.github.io/konura-rust-site/" class="logo">
+                <a class="logo">
+                    <span class="logo-text">KONURA</span>
+                </a>
+            </div>
+            <!-- Аватар пользователя Steam -->
+            <img class="steam-avatar-img" id="steam-avatar" style="display: none;" />
+            <div class="nav-links" id="nav-links">
+                <a href="/" class="nav-link">Главная</a>
+                <a href="../shop/" class="nav-link">Магазин</a>
+                <a href="../stats/" class="nav-link">Статистика</a>
+                <a href="#connect" class="nav-link">Контакты</a>
+            </div>
+
+            <div class="nav-actions">
+                <a href="steam://connect/203.16.163.232:28834" class="join-server-btn" id="join-server">
+                    <span class="btn-icon">🎮</span>
+                    Подключиться
+                </a>
+                <!-- Кнопка входа через Steam -->
+                <a href="https://ktor-server-u2py.onrender.com/steam/login" class="join-server-btn join-steam-btn"
+                    title="Войти через Steam">
+                    <span class="btn-icon"><img class="steam-icon"
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/250px-Steam_icon_logo.svg.png"
+                            alt="Steam"></span>
+                    Steam Login
+                </a>
+                <!-- Кнопка выхода (изначально скрыта) -->
+                <button id="steam-logout" class="join-server-btn" style="display: none;">
+                    <span class="btn-icon">🚪</span>
+                    Выйти
+                </button>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobile-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    <!-- Страница статистики -->
+    <main class="stats-page">
+        <!-- Заголовок страницы -->
+        <div class="page-header">
+            <div class="container">
+                <h1 class="page-title">СТАТИСТИКА <span class="rust-text">RUST</span></h1>
+            </div>
+        </div>
+
+        <!-- Навигация по вкладкам -->
+        <div class="tabs-navigation">
+            <div class="tabs-container">
+                <button class="tab-button active" data-tab="players">👥 Игроки</button>
+                <button class="tab-button" data-tab="clans">🏰 Кланы</button>
+                <button class="tab-button" data-tab="weapons">⚔️ Оружие</button>
+                <button class="tab-button" data-tab="events">🎯 События</button>
+                <button class="tab-button" data-tab="server">🖥️ Сервер</button>
+            </div>
+        </div>
+
+        <!-- Контент -->
+        <div class="container">
+            <div class="tabs-content">
+
+                <!-- Вкладка "Игроки" -->
+                <div id="players" class="tab-panel active">
+
+                    <!-- Поиск и фильтры -->
+                    <div class="search-section">
+                        <div class="search-row">
+                            <input type="text" class="search-input" id="playerSearch"
+                                placeholder="🔍 Поиск игрока по нику...">
+                            <select class="filter-select" id="sortBy">
+                                <option value="kills">Сортировка по убийствам</option>
+                                <option value="deaths">Сортировка по смертям</option>
+                                <option value="kdr">Сортировка по K/D</option>
+                                <option value="playtime">Сортировка по времени игры</option>
+                                <option value="level">Сортировка по уровню</option>
+                            </select>
+                            <select class="filter-select" id="timeFilter">
+                                <option value="all">Все время</option>
+                                <option value="week">Неделя</option>
+                                <option value="month">Месяц</option>
+                                <option value="wipe">С вайпа</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Общая статистика сервера -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <h3>Всего игроков</h3>
+                            <div class="big-number" id="totalPlayers">12,847</div>
+                            <p class="description">Зарегистрировано игроков</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⚔️</div>
+                            <h3>Убийств сегодня</h3>
+                            <div class="big-number" id="todayKills">2,156</div>
+                            <p class="description">За последние 24 часа</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <h3>Онлайн сейчас</h3>
+                            <div class="big-number" id="currentOnline">89</div>
+                            <p class="description">Активных игроков</p>
+                        </div>
+                    </div>
+
+                    <!-- Таблица игроков -->
+                    <div class="players-table-container">
+                        <table class="players-table">
+                            <thead>
+                                <tr>
+                                    <th data-sort="rank">Ранг</th>
+                                    <th data-sort="name">Игрок</th>
+                                    <th data-sort="level">Уровень</th>
+                                    <th data-sort="kills">Убийства</th>
+                                    <th data-sort="deaths">Смерти</th>
+                                    <th data-sort="kdr">K/D</th>
+                                    <th data-sort="headshots">Хедшоты</th>
+                                    <th data-sort="accuracy">Точность</th>
+                                    <th data-sort="playtime">Игровое время</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playersTableBody">
+                                <!-- Данные будут загружены через JavaScript -->
+                            </tbody>
+                        </table>
+
+                        <!-- Пагинация -->
+                        <div class="pagination" id="pagination">
+                            <button id="prevPage" disabled>← Предыдущая</button>
+                            <button class="active">1</button>
+                            <button>2</button>
+                            <button>3</button>
+                            <button>...</button>
+                            <button>25</button>
+                            <button id="nextPage">Следующая →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка "Кланы" -->
+                <div id="clans" class="tab-panel">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🏰</div>
+                            <h3>Активных кланов</h3>
+                            <div class="big-number">147</div>
+                            <p class="description">На сервере</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👑</div>
+                            <h3>Крупнейший клан</h3>
+                            <div class="big-number">25</div>
+                            <p class="description">Участников</p>
+                        </div>
+                    </div>
+
+                    <div class="section-grid">
+                        <div class="top-list">
+                            <h3>🏆 Топ кланов по убийствам</h3>
+                            <div class="top-item">
+                                <span class="top-rank">#1</span>
+                                <div class="top-player">
+                                    <strong>[APEX] Apex Legends</strong>
+                                    <span>24 участника</span>
+                                </div>
+                                <span class="top-value">15,847</span>
+                            </div>
+                            <div class="top-item">
+                                <span class="top-rank">#2</span>
+                                <div class="top-player">
+                                    <strong>[RUST] Rusty Warriors</strong>
+                                    <span>19 участников</span>
+                                </div>
+                                <span class="top-value">12,394</span>
+                            </div>
+                            <div class="top-item">
+                                <span class="top-rank">#2</span>
+                                <div class="top-player">
+                                    <strong>[WOLF] Lone Wolves</strong>
+                                    <span>16 участников</span>
+                                </div>
+                                <span class="top-value">11,573</span>
+                            </div>
+                        </div>
+
+                            <div class="top-list">
+                                <h3>⏱️ Самые активные кланы</h3>
+                                <div class="top-item">
+                                    <span class="top-rank">#1</span>
+                                    <div class="top-player">
+                                        <strong>[24/7] Always Online</strong>
+                                        <span>22 участника</span>
+                                    </div>
+                                    <span class="top-value">847ч</span>
+                                </div>
+                                <div class="top-item">
+                                    <span class="top-rank">#2</span>
+                                    <div class="top-player">
+                                        <strong>[GRIND] Grinders</strong>
+                                        <span>18 участников</span>
+                                    </div>
+                                    <span class="top-value">723ч</span>
+                                </div>
+                                <div class="top-item">
+                                    <span class="top-rank">#3</span>
+                                    <div class="top-player">
+                                        <strong>[FARM] Farmers</strong>
+                                        <span>15 участников</span>
+                                    </div>
+                                    <span class="top-value">689ч</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Вкладка "Оружие" -->
+                    <div id="weapons" class="tab-panel">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">🔫</div>
+                                <h3>Самое популярное</h3>
+                                <div class="big-number">AK47</div>
+                                <p class="description">47% всех убийств</p>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">💥</div>
+                                <h3>Выстрелов сегодня</h3>
+                                <div class="big-number">89,247</div>
+                                <p class="description">За последние 24 часа</p>
+                            </div>
+                        </div>
+
+                        <div class="section-grid">
+                            <div class="top-list">
+                                <h3>🎯 Топ оружие по убийствам</h3>
+                                <div class="top-item">
+                                    <span class="top-rank">#1</span>
+                                    <div class="top-player">
+                                        <strong>🔫 Assault Rifle</strong>
+                                        <span>Автомат</span>
+                                    </div>
+                                    <span class="top-value">47,284</span>
+                                </div>
+                                <div class="top-item">
+                                    <span class="top-rank">#2</span>
+                                    <div class="top-player">
+                                        <strong>🏹 Crossbow</strong>
+                                        <span>Арбалет</span>
+                                    </div>
+                                    <span class="top-value">23,156</span>
+                                </div>
+                                <div class="top-item">
+                                    <span class="top-rank">#3</span>
+                                    <div class="top-player">
+                                        <strong>🔫 Semi-Automatic Rifle</strong>
+                                        <span>Полуавтомат</span>
+                                    </div>
+                                    <span class="top-value">19,847</span>
+                                </div>
+                            </div>
+
+                            <div class="top-list">
+                                <h3>🎯 Самая высокая точность</h3>
+                                <div class="top-item">
+                                    <span class="top-rank">#1</span>
+                                    <div class="top-player">
+                                        <strong>🏹 Hunting Bow</strong>
+                                        <span>Охотничий лук</span>
+                                    </div>
+                                    <span class="top-value">67.3%</span>
+                                </div>
+                                <div class="top-item">
+                                    <span class="top-rank">#2</span>
+                                    <div class="top-player">
+                                        <strong>🔫 Bolt Action Rifle</strong>
+                                        <span>Болтовка</span>
+                                    </div>
+                                    <span class="top-value">61.8%</span>
+                                </div>
+                                <div class="top-item">
+                                    <span class="top-rank">#3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Вкладка "События" -->
+                        <div id="events" class="tab-panel">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">🚁</div>
+                                    <h3>Вертолёты сбиты</h3>
+                                    <div class="big-number">247</div>
+                                    <p class="description">За этот вайп</p>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📦</div>
+                                    <h3>Аирдропы собраны</h3>
+                                    <div class="big-number">1,856</div>
+                                    <p class="description">За этот вайп</p>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🏭</div>
+                                    <h3>Рейды монументов</h3>
+                                    <div class="big-number">3,247</div>
+                                    <p class="description">Успешных рейдов</p>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">💣</div>
+                                    <h3>Взрывчатки использовано</h3>
+                                    <div class="big-number">12,456</div>
+                                    <p class="description">C4 + Ракеты</p>
+                                </div>
+                            </div>
+
+                            <div class="section-grid">
+                                <div class="top-list">
+                                    <h3>🏆 Топ по событиям</h3>
+                                    <div class="top-item">
+                                        <span class="top-rank">#1</span>
+                                        <div class="top-player">
+                                            <strong>HeliHunter2024</strong>
+                                            <span>Убийца вертолётов</span>
+                                        </div>
+                                        <span class="top-value">47 🚁</span>
+                                    </div>
+                                    <div class="top-item">
+                                        <span class="top-rank">#2</span>
+                                        <div class="top-player">
+                                            <strong>AirdropMaster</strong>
+                                            <span>Сборщик аирдропов</span>
+                                        </div>
+                                        <span class="top-value">156 📦</span>
+                                    </div>
+                                    <div class="top-item">
+                                        <span class="top-rank">#3</span>
+                                        <div class="top-player">
+                                            <strong>MonumentRaider</strong>
+                                            <span>Рейдер монументов</span>
+                                        </div>
+                                        <span class="top-value">89 🏭</span>
+                                    </div>
+                                </div>
+
+                                <div class="top-list">
+                                    <h3>💰 Топ по добыче</h3>
+                                    <div class="top-item">
+                                        <span class="top-rank">#1</span>
+                                        <div class="top-player">
+                                            <strong>ResourceKing</strong>
+                                            <span>Добытчик ресурсов</span>
+                                        </div>
+                                        <span class="top-value">847k</span>
+                                    </div>
+                                    <div class="top-item">
+                                        <span class="top-rank">#2</span>
+                                        <div class="top-player">
+                                            <strong>FarmBot9000</strong>
+                                            <span>Фармер</span>
+                                        </div>
+                                        <span class="top-value">723k</span>
+                                    </div>
+                                    <div class="top-item">
+                                        <span class="top-rank">#3</span>
+                                        <div class="top-player">
+                                            <strong>MinerPro</strong>
+                                            <span>Шахтёр</span>
+                                        </div>
+                                        <span class="top-value">689k</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Вкладка "Сервер" -->
+                        <div id="server" class="tab-panel">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">⏱️</div>
+                                    <h3>Аптайм сервера</h3>
+                                    <div class="big-number">99.8%</div>
+                                    <p class="description">За последний месяц</p>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <h3>Средний онлайн</h3>
+                                    <div class="big-number">127</div>
+                                    <p class="description">Игроков в день</p>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🗺️</div>
+                                    <h3>Размер карты</h3>
+                                    <div class="big-number">3500</div>
+                                    <p class="description">Метров</p>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">🔄</div>
+                                    <h3>Дней до вайпа</h3>
+                                    <div class="big-number">12</div>
+                                    <p class="description">Осталось</p>
+                                </div>
+                            </div>
+
+                            <div class="section-grid">
+                                <div class="top-list">
+                                    <h3>📈 График онлайна (24ч)</h3>
+                                    <div
+                                        style="background: rgba(255,255,255,0.1); height: 200px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                                        📊 График онлайна по часам
+                                        <br><small>(Здесь будет интерактивный график)</small>
+                                    </div>
+                                </div>
+
+                                <div class="top-list">
+                                    <h3>🌍 География игроков</h3>
+                                    <div class="top-item">
+                                        <span class="top-rank">🇷🇺</span>
+                                        <div class="top-player">
+                                            <strong>Россия</strong>
+                                            <span>Игроков</span>
+                                        </div>
+                                        <span class="top-value">67%</span>
+                                    </div>
+                                    <div class="top-item">
+                                        <span class="top-rank">🇺🇦</span>
+                                        <div class="top-player">
+                                            <strong>Украина</strong>
+                                            <span>Игроков</span>
+                                        </div>
+                                        <span class="top-value">12%</span>
+                                    </div>
+                                    <div class="top-item">
+                                        <span class="top-rank">🇰🇿</span>
+                                        <div class="top-player">
+                                            <strong>Казахстан</strong>
+                                            <span>Игроков</span>
+                                        </div>
+                                        <span class="top-value">8%</span>
+                                    </div>
+                                    <div class="top-item">
+                                        <span class="top-rank">🌍</span>
+                                        <div class="top-player">
+                                            <strong>Другие</strong>
+                                            <span>Страны</span>
+                                        </div>
+                                        <span class="top-value">13%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+    </main>
+
+    <!-- Футер -->
+    <footer id="connect" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">KONURA RUST</h3>
+                    <p class="footer-description">
+                        Интенсивные PvP бои, строительство и выживание.
+                    </p>
+                    <div class="social-icons">
+                        <a href="https://www.youtube.com/@KonuraRust" class="social-link youtube" title="YouTube">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png"
+                                alt="YouTube">
+                        </a>
+                        <a href="https://t.me/konurarust" class="social-link telegram" title="Telegram">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/2048px-Telegram_logo.svg.png"
+                                alt="Telegram">
+                        </a>
+                        <a href="https://discord.gg/pYR8brsq5W" class="social-link discord" title="Discord">
+                            <img src="https://upload.wikimedia.org/wikipedia/fr/thumb/4/4f/Discord_Logo_sans_texte.svg/1818px-Discord_Logo_sans_texte.png"
+                                alt="Discord">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="footer-title">Быстрые ссылки</h3>
+                    <ul class="footer-links">
+                        <li><a href="#join">Подключиться</a></li>
+                        <li><a href="#rules">Правила</a></li>
+                        <li><a href="../shop/">Магазин</a></li>
+                        <li><a href="https://discord.gg/pYR8brsq5W">Discord</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="footer-title">Поддержка</h3>
+                    <ul class="footer-links">
+                        <li><a href="#help">Помощь</a></li>
+                        <li><a href="#bugs">Сообщить об ошибке</a></li>
+                        <li><a href="#admin">Администратор</a></li>
+                        <li><a href="#appeals">Апелляция</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p class="copyright">&copy; 2024 Konura Rust. Все права защищены.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#privacy">Конфиденциальность</a>
+                        <a href="#terms">Условия</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="stats-script.js"> </script>
+</body>
+
+</html>
